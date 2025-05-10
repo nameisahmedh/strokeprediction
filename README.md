@@ -38,7 +38,7 @@ This is a desktop-based Stroke Prediction application built using **Python (Tkin
 3. Run the application:
 
    ```bash
-   python app.py
+   python Main.py
    ```
 
 ## 📊 Input Parameters
