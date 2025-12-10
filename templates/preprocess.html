@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}Preprocess Data - Arix Stroke Prediction{% endblock %}
+
+{% block extra_css %}
+<style>
+    .workflow-indicator {
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .workflow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .workflow-step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .workflow-step-number.active {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .workflow-step-number.completed {
+        background: #10B981;
+        color: white;
+    }
+
+    .workflow-step-number.pending {
+        background: #E2E8F0;
+        color: #64748B;
+    }
+
+    .workflow-step-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0F172A;
+    }
+
+    .workflow-arrow {
+        color: #CBD5E1;
+        font-size: 1.25rem;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .workflow-arrow {
+            display: block;
+        }
+
+        .workflow-step {
+            min-width: auto;
+        }
+    }
+
+    .processing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+    }
+
+    .processing-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 360px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid #E2E8F0;
+        border-top: 3px solid #3B82F6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .next-step-btn {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        text-decoration: none;
+    }
+
+    .next-step-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .next-step-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+    }
+
+    .preprocess-success {
+        background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        border: 2px solid #10B981;
+        border-radius: 12px;
+        padding: 1.5rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .preprocess-success h4 {
+        color: #047857;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .preprocess-stats {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        font-size: 1rem;
+        color: #065F46;
+    }
+
+    .preprocess-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preprocess-stat strong {
+        font-weight: 700;
+        color: #047857;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Workflow Indicator -->
+        <div class="workflow-indicator">
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="workflow-step-number completed">①</div>
+                    <span class="workflow-step-label">Upload Data</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number active">②</div>
+                    <span class="workflow-step-label">Preprocess</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number pending">③</div>
+                    <span class="workflow-step-label">Train Model</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number pending">④</div>
+                    <span class="workflow-step-label">Predict</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4" style="font-size: 1.75rem; font-weight: 600; color: #1E293B;">
+            Preprocess Dataset
+        </h2>
+
+        <!-- Info Card -->
+        <div class="alert alert-light mb-4"
+            style="border-left: 4px solid #3B82F6; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-info-circle" style="color: #2563EB; font-size: 1.25rem;"></i>
+                <div>
+                    <strong style="color: #1E40AF; font-weight: 600;">Auto-Preprocessing:</strong>
+                    <span style="color: #1E3A8A;">Encoding, Scaling, SMOTE balancing, and Feature Selection will be
+                        applied automatically.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preprocess Card -->
+        <div class="card mb-4">
+            <div class="card-header"
+                style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white;">
+                <i class="fas fa-cogs me-2"></i>Run Data Preprocessing
+            </div>
+            <div class="card-body p-4 text-center">
+                <p class="text-muted mb-4">Click the button below to preprocess your uploaded dataset</p>
+                <button class="btn btn-primary btn-lg px-5" onclick="preprocess()" id="btnPreprocess">
+                    <i class="fas fa-play me-2"></i>Run Preprocessing
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Container -->
+        <div id="preprocessResult"></div>
+    </div>
+</div>
+
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay">
+    <div class="processing-content">
+        <div class="loading-spinner"></div>
+        <h5 id="overlayTitle" style="font-weight: 600; color: #1E293B;">Processing...</h5>
+        <p id="overlayMessage" class="text-muted mb-0">Please wait</p>
+    </div>
+</div>
+
+<div id="alertContainer"></div>
+
+<!-- Next Step Button -->
+<a href="/train-page" class="next-step-btn" title="Next: Train Model">
+    <i class="fas fa-arrow-right"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Check if data is loaded on page load
+    async function checkDataLoaded() {
+        try {
+            const response = await fetch('/check_data_status', { method: 'GET' });
+            const data = await response.json();
+
+            const btn = document.getElementById('btnPreprocess');
+
+            if (!data.data_loaded) {
+                showAlert('❌ Please upload dataset first!', 'danger');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-lock me-2"></i>Locked - Upload Data First';
+
+                setTimeout(() => {
+                    window.location.href = '/upload-page';
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Error checking data status:', error);
+        }
+    }
+
+    // Run check on page load
+    checkDataLoaded();
+
+    async function preprocess() {
+        const btn = document.getElementById('btnPreprocess');
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Preprocessing Data...';
+        overlayMessage.textContent = 'Encoding, scaling, SMOTE, feature selection';
+
+        try {
+            const response = await fetch('/preprocess', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Complete!';
+                overlayMessage.textContent = 'Data preprocessed successfully';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('preprocessResult').innerHTML = `
+                    <div class="preprocess-success fade-in">
+                        <h4><i class="fas fa-check-circle me-2"></i>Preprocessing Complete!</h4>
+                        <div class="preprocess-stats">
+                            <div class="preprocess-stat">
+                                <i class="fas fa-chart-bar"></i>
+                                <span><strong>Train:</strong> ${data.train_size}</span>
+                            </div>
+                            <div class="preprocess-stat">
+                                <i class="fas fa-chart-line"></i>
+                                <span><strong>Test:</strong> ${data.test_size}</span>
+                            </div>
+                            <div class="preprocess-stat">
+                                <i class="fas fa-sliders-h"></i>
+                                <span><strong>Features:</strong> ${data.features}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                    showAlert('✅ Data preprocessed successfully! Ready to train models.', 'success');
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('❌ Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('❌ Preprocessing failed: ' + error.message, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play me-2"></i>Run Preprocessing';
+        }
+    }
+</script>
+{% endblock %}

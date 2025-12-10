@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Data - Arix Stroke Prediction{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .upload-zone {
+        border: 2px dashed #CBD5E1;
+        border-radius: 8px;
+        transition: all 0.2s;
+        background: #F8FAFC;
+        cursor: pointer;
+    }
+
+    .upload-zone:hover {
+        border-color: #3B82F6;
+        background: #EFF6FF;
+    }
+
+    .upload-zone.dragging {
+        border-color: #3B82F6;
+        background: #DBEAFE;
+    }
+
+    .progress-container {
+        display: none;
+        margin-top: 1rem;
+    }
+
+    .processing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+    }
+
+    .processing-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 360px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid #E2E8F0;
+        border-top: 3px solid #3B82F6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .card {
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9375rem;
+    }
+
+    /* Workflow Indicator */
+    .workflow-indicator {
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .workflow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .workflow-step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .workflow-step-number.active {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .workflow-step-number.completed {
+        background: #10B981;
+        color: white;
+    }
+
+    .workflow-step-number.pending {
+        background: #E2E8F0;
+        color: #64748B;
+    }
+
+    .workflow-step-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0F172A;
+    }
+
+    .workflow-arrow {
+        color: #CBD5E1;
+        font-size: 1.25rem;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .workflow-arrow {
+            display: block;
+        }
+
+        .workflow-step {
+            min-width: auto;
+        }
+    }
+
+    .next-step-btn {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        text-decoration: none;
+    }
+
+    .next-step-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
+        color: white;
+    }
+
+    .next-step-btn:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    @media (max-width: 768px) {
+        .next-step-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+    }
+
+    /* Success Message Styling */
+    .preprocess-success {
+        background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        border: 2px solid #10B981;
+        border-radius: 12px;
+        padding: 1.5rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .preprocess-success h4 {
+        color: #047857;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .preprocess-stats {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        font-size: 1rem;
+        color: #065F46;
+    }
+
+    .preprocess-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preprocess-stat strong {
+        font-weight: 700;
+        color: #047857;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Workflow Indicator -->
+        <div class="workflow-indicator">
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="workflow-step-number active">①</div>
+                    <span class="workflow-step-label">Upload Data</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number pending">②</div>
+                    <span class="workflow-step-label">Preprocess</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number pending">③</div>
+                    <span class="workflow-step-label">Train Model</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number pending">④</div>
+                    <span class="workflow-step-label">Predict</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4" style="font-size: 1.75rem; font-weight: 600; color: #1E293B;">
+            Upload Dataset
+        </h2>
+
+        <!-- Quick Start Section - Clean & Minimal -->
+        <div class="card mb-3" style="border: 1px solid #10B981; background: #F0FDF4;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="me-3"
+                        style="width: 40px; height: 40px; background: #10B981; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-database" style="color: white; font-size: 1.1rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 fw-semibold" style="color: #1E293B;">Quick Start (Recommended)</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.875rem;">
+                            Use pre-loaded healthcare dataset with 5,110 patient records
+                        </p>
+                    </div>
+                </div>
+                <button class="btn btn-success w-100" onclick="useDefaultDataset()" id="btnDefaultDataset"
+                    style="font-weight: 500;">
+                    Load Default Dataset
+                </button>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="text-center my-3">
+            <span class="text-muted" style="font-size: 0.875rem;">or</span>
+        </div>
+
+        <!-- Custom Upload Section - Clean & Minimal -->
+        <div class="card mb-3">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="me-3"
+                        style="width: 40px; height: 40px; background: #3B82F6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-upload" style="color: white; font-size: 1.1rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 fw-semibold" style="color: #1E293B;">Upload Custom Dataset</h6>
+                        <p class="mb-2 text-muted" style="font-size: 0.875rem;">
+                            CSV file with required columns: gender, age, hypertension, heart_disease, ever_married,
+                            work_type, Residence_type, avg_glucose_level, bmi, smoking_status, stroke
+                        </p>
+                    </div>
+                </div>
+
+                <div class="upload-zone" id="uploadZone" style="padding: 2rem;">
+                    <div class="text-center">
+                        <i class="fas fa-cloud-upload-alt text-primary mb-2" style="font-size: 2rem;"></i>
+                        <p class="mb-2 fw-medium" style="color: #475569;">Drop CSV file here or browse</p>
+                        <input type="file" class="form-control" id="datasetFile" accept=".csv" style="display: none;">
+                        <button class="btn btn-outline-primary"
+                            onclick="event.stopPropagation(); document.getElementById('datasetFile').click()">
+                            Choose File
+                        </button>
+                        <p class="text-muted mt-2 mb-0" id="fileName" style="font-size: 0.875rem;">No file selected</p>
+                    </div>
+                </div>
+
+                <div class="progress-container" id="uploadProgress">
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" id="progressBar">0%
+                        </div>
+                    </div>
+                    <p class="text-center mt-2 mb-0" style="font-size: 0.875rem;"><span
+                            id="uploadStatus">Uploading...</span></p>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-3" onclick="uploadDataset()" id="btnUpload"
+                    style="display: none; font-weight: 500;">
+                    Upload Dataset
+                </button>
+            </div>
+        </div>
+
+        <div class="card mb-3 fade-in" id="datasetInfo" style="display:none;">
+            <div class="card-body p-4">
+                <h6 class="mb-3 fw-semibold" style="color: #1E293B;">Dataset Overview</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="p-3"
+                            style="background: #F8FAFC; border-radius: 8px; border-left: 3px solid #3B82F6;">
+                            <h4 id="statRows" class="mb-0" style="color: #3B82F6; font-weight: 600;">-</h4>
+                            <small class="text-muted">Total Rows</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3"
+                            style="background: #F8FAFC; border-radius: 8px; border-left: 3px solid #10B981;">
+                            <h4 id="statCols" class="mb-0" style="color: #10B981; font-weight: 600;">-</h4>
+                            <small class="text-muted">Columns</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3"
+                            style="background: #F8FAFC; border-radius: 8px; border-left: 3px solid #F59E0B;">
+                            <h4 id="statMissing" class="mb-0" style="color: #F59E0B; font-weight: 600;">-</h4>
+                            <small class="text-muted">Missing Values</small>
+                        </div>
+                    </div>
+                </div>
+                <div id="dataPreview" class="table-responsive"></div>
+            </div>
+        </div>
+
+        <div class="card mb-3 fade-in" id="preprocessCard" style="display:none;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="me-3"
+                        style="width: 40px; height: 40px; background: #8B5CF6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-cogs" style="color: white; font-size: 1.1rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 fw-semibold" style="color: #1E293B;">Preprocess Data</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.875rem;">
+                            Encoding, Scaling, SMOTE, and Feature Selection
+                        </p>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100" onclick="preprocess()" id="btnPreprocess"
+                    style="font-weight: 500;">
+                    Run Preprocessing
+                </button>
+                <div id="preprocessResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay">
+    <div class="processing-content">
+        <div class="loading-spinner"></div>
+        <h4 class="fw-bold mb-2" id="overlayTitle">Processing...</h4>
+        <p class="text-muted mb-0" id="overlayMessage">Please wait</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Workflow State Management (MUST BE DEFINED FIRST)
+    function updateWorkflowState(step, state) {
+        const stepElements = document.querySelectorAll('.workflow-step-number');
+        if (stepElements[step - 1]) {
+            stepElements[step - 1].classList.remove('active', 'completed', 'pending');
+            stepElements[step - 1].classList.add(state);
+        }
+    }
+
+    // Drag and drop functionality
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('datasetFile');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragging');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragging');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragging');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            document.getElementById('fileName').textContent = `Selected: ${files[0].name}`;
+            document.getElementById('fileName').style.color = 'var(--success)';
+            document.getElementById('btnUpload').style.display = 'block';
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+            document.getElementById('fileName').style.color = 'var(--success)';
+            document.getElementById('btnUpload').style.display = 'block';
+        }
+    });
+
+    async function useDefaultDataset() {
+        const btn = document.getElementById('btnDefaultDataset');
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Loading Default Dataset...';
+        overlayMessage.textContent = 'Preparing stroke prediction data';
+
+        try {
+            const response = await fetch('/use_default_dataset', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Dataset Loaded!';
+                overlayMessage.textContent = 'Data ready for preprocessing';
+
+                setTimeout(() => {
+                    document.getElementById('statRows').textContent = data.rows;
+                    document.getElementById('statCols').textContent = data.columns;
+                    document.getElementById('statMissing').textContent = data.missing;
+                    document.getElementById('dataPreview').innerHTML = data.preview;
+                    document.getElementById('datasetInfo').style.display = 'block';
+                    overlay.style.display = 'none';
+                    showAlert('✅ Default dataset loaded successfully! Redirecting to preprocess...', 'success');
+                    updateWorkflowState(1, 'completed');
+
+                    setTimeout(() => {
+                        window.location.href = '/preprocess-page';
+                    }, 1500);
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('❌ Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('❌ Failed to load default dataset: ' + error.message, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-database"></i> Load Default Dataset';
+        }
+    }
+
+    async function uploadDataset() {
+        const file = fileInput.files[0];
+
+        if (!file) {
+            showAlert('Please select a CSV file', 'warning');
+            return;
+        }
+
+        const btnUpload = document.getElementById('btnUpload');
+        btnUpload.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Uploading Dataset...';
+        overlayMessage.textContent = `Processing ${file.name}`;
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Upload Complete!';
+                overlayMessage.textContent = 'Dataset uploaded successfully';
+
+                // Show stats briefly
+                document.getElementById('statRows').textContent = data.rows;
+                document.getElementById('statCols').textContent = data.columns;
+                document.getElementById('statMissing').textContent = data.missing;
+                document.getElementById('dataPreview').innerHTML = data.preview;
+                document.getElementById('datasetInfo').style.display = 'block';
+
+                showAlert('✅ Dataset uploaded successfully! Redirecting to preprocess...', 'success');
+                updateWorkflowState(1, 'completed');
+
+                // Redirect to preprocess page after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = '/preprocess-page';
+                }, 1500);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('❌ Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('❌ Upload failed: ' + error.message, 'danger');
+        } finally {
+            btnUpload.disabled = false;
+        }
+    }
+
+    async function preprocess() {
+        const btn = document.getElementById('btnPreprocess');
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Preprocessing Data...';
+        overlayMessage.textContent = 'Encoding, scaling, SMOTE, feature selection';
+
+        try {
+            const response = await fetch('/preprocess', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Complete!';
+                overlayMessage.textContent = 'Data preprocessed successfully';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('preprocessResult').innerHTML = `
+                    <div class="preprocess-success fade-in">
+                        <h4><i class="fas fa-check-circle me-2"></i>Preprocessing Complete!</h4>
+                        <div class="preprocess-stats">
+                            <div class="preprocess-stat">
+                                <i class="fas fa-chart-bar"></i>
+                                <span><strong>Train:</strong> ${data.train_size}</span>
+                            </div>
+                            <div class="preprocess-stat">
+                                <i class="fas fa-chart-line"></i>
+                                <span><strong>Test:</strong> ${data.test_size}</span>
+                            </div>
+                            <div class="preprocess-stat">
+                                <i class="fas fa-sliders-h"></i>
+                                <span><strong>Features:</strong> ${data.features}</span>
+                            </div>
+                        </div>
+                    </div>
+                        </p>
+                    </div>
+                `;
+                    showAlert('✅ Data preprocessed successfully! Ready to train models.', 'success');
+                    updateWorkflowState(2, 'completed'); // Mark step 2 as completed
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('❌ Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('❌ Preprocessing failed: ' + error.message, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play"></i> Run Preprocessing';
+        }
+    }
+</script>
+{% endblock %}

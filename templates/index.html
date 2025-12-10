@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Prediction System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-heartbeat"></i> Stroke Prediction System
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-tasks"></i> Workflow</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="workflow-step" id="step1">
+                            <h6><i class="fas fa-upload"></i> 1. Upload Dataset</h6>
+                            <input type="file" class="form-control form-control-sm" id="datasetFile" accept=".csv">
+                            <button class="btn btn-primary btn-sm w-100 mt-2" onclick="uploadDataset()">Upload</button>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="workflow-step" id="step2">
+                            <h6><i class="fas fa-cogs"></i> 2. Preprocess</h6>
+                            <button class="btn btn-secondary btn-sm w-100" onclick="preprocess()" disabled id="btnPreprocess">Run Preprocessing</button>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="workflow-step" id="step3">
+                            <h6><i class="fas fa-brain"></i> 3. Train Model</h6>
+                            <select class="form-select form-select-sm mb-2" id="modelSelect" disabled>
+                                <option value="RandomForest">Random Forest</option>
+                                <option value="LogisticRegression">Logistic Regression</option>
+                                <option value="SVM">SVM</option>
+                                <option value="KNN">KNN</option>
+                                <option value="NaiveBayes">Naive Bayes</option>
+                                <option value="XGBoost">XGBoost</option>
+                                <option value="CatBoost">CatBoost</option>
+                            </select>
+                            <button class="btn btn-success btn-sm w-100 mb-2" onclick="trainModel()" disabled id="btnTrain">Train</button>
+                            <button class="btn btn-info btn-sm w-100" onclick="compareModels()" disabled id="btnCompare">Compare All</button>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="workflow-step" id="step4">
+                            <h6><i class="fas fa-save"></i> 4. Save/Load</h6>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-warning btn-sm flex-fill" onclick="saveModel()" disabled id="btnSave">Save</button>
+                                <button class="btn btn-dark btn-sm flex-fill" onclick="loadModel()">Load</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Alert Area -->
+                <div id="alertArea"></div>
+
+                <!-- Dataset Info -->
+                <div class="card shadow-sm mb-3" id="datasetInfo" style="display:none;">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-database"></i> Dataset Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <h3 id="statRows">-</h3>
+                                    <p>Rows</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <h3 id="statCols">-</h3>
+                                    <p>Columns</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <h3 id="statMissing">-</h3>
+                                    <p>Missing Values</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3" id="dataPreview"></div>
+                    </div>
+                </div>
+
+                <!-- Training Results -->
+                <div class="card shadow-sm mb-3" id="trainingResults" style="display:none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Training Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center mb-3">
+                            <div class="col-md-3">
+                                <div class="metric-box">
+                                    <h4 id="metricAcc">-</h4>
+                                    <p>Accuracy</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-box">
+                                    <h4 id="metricPrec">-</h4>
+                                    <p>Precision</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-box">
+                                    <h4 id="metricRec">-</h4>
+                                    <p>Recall</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-box">
+                                    <h4 id="metricF1">-</h4>
+                                    <p>F1-Score</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <img id="confusionMatrix" src="" alt="Confusion Matrix" style="max-width:100%; height:auto;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Comparison -->
+                <div class="card shadow-sm mb-3" id="comparisonResults" style="display:none;">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="fas fa-balance-scale"></i> Model Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="comparisonTable"></div>
+                    </div>
+                </div>
+
+                <!-- Prediction Section -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="fas fa-stethoscope"></i> Make Prediction</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#singlePred">Single Patient</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#batchPred">Batch CSV</a>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content mt-3">
+                            <div id="singlePred" class="tab-pane fade show active">
+                                <form id="predictionForm">
+                                    <div class="row" id="formFields"></div>
+                                    <button type="submit" class="btn btn-danger mt-3" disabled id="btnPredict">
+                                        <i class="fas fa-magic"></i> Predict Stroke Risk
+                                    </button>
+                                </form>
+                                <div id="predictionResult" class="mt-3"></div>
+                            </div>
+                            
+                            <div id="batchPred" class="tab-pane fade">
+                                <input type="file" class="form-control mb-3" id="testFile" accept=".csv">
+                                <button class="btn btn-primary" onclick="predictCSV()" disabled id="btnPredictCSV">
+                                    <i class="fas fa-file-csv"></i> Predict from CSV
+                                </button>
+                                <div id="batchResults" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

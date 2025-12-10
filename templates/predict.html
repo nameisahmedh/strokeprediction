@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+
+{% block title %}Predict - Arix Stroke Prediction{% endblock %}
+
+{% block extra_css %}
+<style>
+    .workflow-indicator {
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .workflow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .workflow-step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .workflow-step-number.active {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .workflow-step-number.completed {
+        background: #10B981;
+        color: white;
+    }
+
+    .workflow-step-number.pending {
+        background: #E2E8F0;
+        color: #64748B;
+    }
+
+    .workflow-step-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0F172A;
+    }
+
+    .workflow-arrow {
+        color: #CBD5E1;
+        font-size: 1.25rem;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .workflow-arrow {
+            display: block;
+        }
+
+        .workflow-step {
+            min-width: auto;
+        }
+    }
+
+    .nav-pills .nav-link {
+        color: #1E293B;
+        font-weight: 600;
+        transition: all 0.2s;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white !important;
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+        background: #E0E7FF;
+        color: #4F46E5;
+    }
+
+    .nav-pills .nav-link i {
+        font-size: 1.1rem;
+    }
+
+    .next-step-btn {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        text-decoration: none;
+    }
+
+    .next-step-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
+        color: white;
+    }
+
+    .next-step-btn:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    @media (max-width: 768px) {
+        .next-step-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Workflow Indicator -->
+        <div class="workflow-indicator">
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="workflow-step-number completed">①</div>
+                    <span class="workflow-step-label">Upload Data</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number completed">②</div>
+                    <span class="workflow-step-label">Preprocess</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number completed">③</div>
+                    <span class="workflow-step-label">Train Model</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number active">④</div>
+                    <span class="workflow-step-label">Predict</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4 fw-bold"
+            style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i class="fas fa-stethoscope" style="-webkit-text-fill-color: var(--success);"></i> Make Predictions
+        </h2>
+
+        <ul class="nav nav-pills mb-4" role="tablist"
+            style="background: #F1F5F9; padding: 0.75rem; border-radius: 12px; gap: 0.5rem;">
+            <li class="nav-item flex-fill">
+                <a class="nav-link active" data-bs-toggle="pill" href="#singlePred" style="border-radius: 8px;">
+                    <i class="fas fa-user me-2"></i>Single Patient
+                </a>
+            </li>
+            <li class="nav-item flex-fill">
+                <a class="nav-link" data-bs-toggle="pill" href="#batchPred" style="border-radius: 8px;">
+                    <i class="fas fa-file-csv me-2"></i>Batch CSV
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="singlePred" class="tab-pane fade show active">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-user-md"></i> Single Patient Prediction
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Gender</label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Age</label>
+                                    <input type="number" class="form-control" name="age" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Hypertension</label>
+                                    <select class="form-select" name="hypertension" required>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Heart Disease</label>
+                                    <select class="form-select" name="heart_disease" required>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Ever Married</label>
+                                    <select class="form-select" name="ever_married" required>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Work Type</label>
+                                    <select class="form-select" name="work_type" required>
+                                        <option value="Private">Private</option>
+                                        <option value="Self-employed">Self-employed</option>
+                                        <option value="Govt_job">Government Job</option>
+                                        <option value="children">Children</option>
+                                        <option value="Never_worked">Never Worked</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Residence Type</label>
+                                    <select class="form-select" name="Residence_type" required>
+                                        <option value="Urban">Urban</option>
+                                        <option value="Rural">Rural</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Average Glucose Level</label>
+                                    <input type="number" class="form-control" name="avg_glucose_level" step="0.01"
+                                        required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">BMI</label>
+                                    <input type="number" class="form-control" name="bmi" step="0.01" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-4 w-100" id="btnPredict">
+                                <i class="fas fa-magic"></i> Predict Stroke Risk
+                            </button>
+                        </form>
+                        <div id="predictionResult" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="batchPred" class="tab-pane fade">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-csv"></i> Batch CSV Prediction
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info mb-3">
+                            <strong>CSV Format:</strong> Include columns: gender, age, hypertension, heart_disease,
+                            ever_married, work_type, Residence_type, avg_glucose_level, bmi, smoking_status
+                        </div>
+                        <input type="file" class="form-control mb-3" id="testFile" accept=".csv">
+                        <button class="btn btn-primary me-2" onclick="predictCSV()" id="btnPredictCSV">
+                            <i class="fas fa-play"></i> Predict from Your CSV
+                        </button>
+                        <button class="btn btn-success" onclick="useDefaultTest()" id="btnDefaultTest">
+                            <i class="fas fa-database"></i> Use Default Test Data
+                        </button>
+                        <div id="batchResults" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Check if model is trained on page load
+    async function checkPrerequisites() {
+        try {
+            const response = await fetch('/check_data_status', { method: 'GET' });
+            const data = await response.json();
+
+            if (!data.data_loaded) {
+                showAlert('❌ Please upload dataset first!', 'danger');
+                setTimeout(() => { window.location.href = '/upload-page'; }, 2000);
+                return false;
+            }
+
+            if (!data.preprocessed) {
+                showAlert('❌ Please preprocess data first!', 'danger');
+                setTimeout(() => { window.location.href = '/preprocess-page'; }, 2000);
+                return false;
+            }
+
+            if (!data.model_trained) {
+                showAlert('❌ Please train a model first!', 'danger');
+                setTimeout(() => { window.location.href = '/train-page'; }, 2000);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error checking prerequisites:', error);
+            return true;
+        }
+    }
+
+    // Run check on page load
+    checkPrerequisites();
+
+    document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                const resultDiv = document.getElementById('predictionResult');
+
+                if (result.prediction === 0) {
+                    resultDiv.innerHTML = `
+                    <div class="card" style="border: 2px solid var(--success); background: #F0FDF4;">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h4 class="fw-bold" style="color: var(--success);">No Stroke Risk Detected</h4>
+                            <p class="text-dark mb-2">The patient shows low risk indicators</p>
+                            ${result.confidence ? `<div class="mt-3"><span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem;">Confidence: ${result.confidence.toFixed(1)}%</span></div>` : ''}
+                        </div>
+                    </div>
+                `;
+                } else {
+                    resultDiv.innerHTML = `
+                    <div class="card" style="border: 2px solid var(--danger); background: #FEF2F2;">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                            <h4 class="fw-bold" style="color: var(--danger);">High Stroke Risk Detected</h4>
+                            <p class="text-dark mb-2">Please seek immediate medical attention</p>
+                            ${result.confidence ? `<div class="mt-3"><span class="badge bg-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">Confidence: ${result.confidence.toFixed(1)}%</span></div>` : ''}
+                        </div>
+                    </div>
+                `;
+                }
+            } else {
+                showAlert('Error: ' + result.error, 'danger');
+            }
+        } catch (error) {
+            showAlert('Prediction failed: ' + error, 'danger');
+        }
+    });
+
+    async function predictCSV() {
+        const fileInput = document.getElementById('testFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            showAlert('Please select a CSV file', 'warning');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/predict_csv', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const resultsDiv = document.getElementById('batchResults');
+                const noRisk = data.total - data.strokes;
+                resultsDiv.innerHTML = `
+                <div class="card mt-3" style="border: 1px solid var(--light-gray);">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Prediction Summary</h5>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <h3 style="color: var(--primary);">${data.total}</h3>
+                                    <p>Total Samples</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <h3 style="color: var(--success);">${noRisk}</h3>
+                                    <p>No Risk</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <h3 style="color: var(--danger);">${data.strokes}</h3>
+                                    <p>High Risk</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">${data.preview}</div>
+                    </div>
+                </div>
+            `;
+                window.csvData = data.csv;
+                showAlert('Predictions completed successfully!', 'success');
+            } else {
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            showAlert('Prediction failed: ' + error, 'danger');
+        }
+    }
+
+    async function useDefaultTest() {
+        try {
+            const response = await fetch('/use_default_test', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                const resultsDiv = document.getElementById('batchResults');
+                const noRisk = data.total - data.strokes;
+                resultsDiv.innerHTML = `
+                <div class="card mt-3" style="border: 1px solid var(--light-gray);">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Prediction Summary</h5>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <h3 style="color: var(--primary);">${data.total}</h3>
+                                    <p>Total Samples</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <h3 style="color: var(--success);">${noRisk}</h3>
+                                    <p>No Risk</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <h3 style="color: var(--danger);">${data.strokes}</h3>
+                                    <p>High Risk</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">${data.preview}</div>
+                    </div>
+                </div>
+            `;
+                window.csvData = data.csv;
+                showAlert('Predictions completed successfully!', 'success');
+            } else {
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            showAlert('Prediction failed: ' + error, 'danger');
+        }
+    }
+</script>
+
+<!-- Next Step Button -->
+<a href="/analysis-page" class="next-step-btn" title="Next: Analysis">
+    <i class="fas fa-arrow-right"></i>
+</a>
+{% endblock %}
+```

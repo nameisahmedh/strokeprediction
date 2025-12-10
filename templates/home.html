@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Arix Stroke Prediction{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Compatibility fix for gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-image-container {
+        animation: float 6s ease-in-out infinite;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hero-image-container:hover {
+        animation-play-state: paused;
+        transform: scale(1.03);
+    }
+
+    .hero-image-container:hover .img-fluid {
+        box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .stat-item {
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-11">
+        <!-- Modern Hero Section with Image -->
+        <div class="row align-items-center mb-5 py-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="mb-3">
+                    <span class="badge"
+                        style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); padding: 0.5rem 1rem; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.025em;">
+                        MACHINE LEARNING HEALTHCARE
+                    </span>
+                </div>
+                <h1 class="display-3 fw-bold mb-4" style="letter-spacing: -0.04em; line-height: 1.1;">
+                    <span class="gradient-text">Arix</span> Stroke Risk
+                    <span class="d-block mt-2" style="font-size: 0.6em; font-weight: 600;">
+                        Powered by Machine Learning
+                    </span>
+                </h1>
+                <p class="lead text-muted mb-4" style="font-size: 1.125rem; line-height: 1.7;">
+                    Early detection saves lives. Our system uses 7 proven machine learning algorithms trained on real
+                    healthcare data to analyze 11 critical health parameters and predict stroke risk.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/upload-page" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-rocket me-2"></i>Get Started
+                    </a>
+                    <a href="/learn-more" class="btn btn-outline-primary btn-lg px-4">
+                        Learn More
+                    </a>
+                </div>
+                <!-- Stats -->
+                <div class="row mt-5 g-4">
+                    <div class="col-4">
+                        <h3 class="fw-bold mb-1" style="color: #4F46E5;">7</h3>
+                        <small class="text-muted">ML Algorithms</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="fw-bold mb-1" style="color: #10B981;">95%</h3>
+                        <small class="text-muted">Accuracy</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="fw-bold mb-1" style="color: #F59E0B;">5K+</h3>
+                        <small class="text-muted">Records</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="position-relative hero-image-container">
+                    <div class="p-4"
+                        style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border-radius: 24px; box-shadow: 0 20px 60px -10px rgba(79, 70, 229, 0.2);">
+                        <img src="{{ url_for('static', filename='images/hero.png') }}"
+                            alt="Stroke Prediction ML Visualization" class="img-fluid rounded-3"
+                            style="box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);">
+                    </div>
+                    <!-- Floating Badge -->
+                    <div class="position-absolute"
+                        style="top: 2rem; right: 2rem; background: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);">
+                        <div class="d-flex align-items-center gap-2">
+                            <div
+                                style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 2s infinite;">
+                            </div>
+                            <span class="fw-semibold" style="font-size: 0.875rem;">ML Model Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Features - Simplified -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4 fade-in-up">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3" style="font-size: 2.5rem; color: #4F46E5;">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Upload Data</h5>
+                        <p class="text-muted small mb-0">Quick dataset upload or use our pre-loaded healthcare data</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3" style="font-size: 2.5rem; color: #10B981;">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Train Models</h5>
+                        <p class="text-muted small mb-0">Choose from 7 ML algorithms or compare all at once</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.4s;">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3" style="font-size: 2.5rem; color: #F59E0B;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Get Predictions</h5>
+                        <p class="text-muted small mb-0">Single patient or batch analysis with detailed insights</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Stroke Prediction Matters - Brief Version -->
+        <div class="row mb-5">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);">
+                    <div class="card-body p-4">
+                        <div class="mb-3" style="font-size: 2rem; color: #EF4444;">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">The Challenge</h4>
+                        <p class="mb-2"><strong>Every 40 seconds</strong>, someone suffers a stroke worldwide</p>
+                        <p class="mb-2"><strong>80%</strong> of strokes are preventable with early detection</p>
+                        <p class="mb-0 text-muted small">Early risk assessment can save lives and prevent disability</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0" style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);">
+                    <div class="card-body p-4">
+                        <div class="mb-3" style="font-size: 2rem; color: #10B981;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Our Solution</h4>
+                        <p class="mb-2"><strong>Machine Learning</strong> analyzes patient health data</p>
+                        <p class="mb-2"><strong>Predicts risk</strong> before symptoms appear</p>
+                        <p class="mb-0 text-muted small">Enables preventive intervention and lifestyle changes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final CTA - Only 2 Buttons -->
+        <div class="text-center py-5 mb-4">
+            <h3 class="fw-bold mb-3">Ready to Get Started?</h3>
+            <p class="mb-4 text-muted">Upload data and start predicting stroke risk with machine learning</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="/upload-page" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-rocket me-2"></i>Get Started
+                </a>
+                <a href="/learn-more" class="btn btn-outline-primary btn-lg px-5">
+                    <i class="fas fa-book me-2"></i>Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```

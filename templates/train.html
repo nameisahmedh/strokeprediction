@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}Train Model - Arix Stroke Prediction{% endblock %}
+
+{% block extra_css %}
+<style>
+    .workflow-indicator {
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .workflow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .workflow-step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .workflow-step-number.active {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .workflow-step-number.completed {
+        background: #10B981;
+        color: white;
+    }
+
+    .workflow-step-number.pending {
+        background: #E2E8F0;
+        color: #64748B;
+    }
+
+    .workflow-step-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0F172A;
+    }
+
+    .workflow-arrow {
+        color: #CBD5E1;
+        font-size: 1.25rem;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .workflow-arrow {
+            display: block;
+        }
+
+        .workflow-step {
+            min-width: auto;
+        }
+    }
+
+    .next-step-btn {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        text-decoration: none;
+    }
+
+    .next-step-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .next-step-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Workflow Indicator -->
+        <div class="workflow-indicator">
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="workflow-step-number completed">①</div>
+                    <span class="workflow-step-label">Upload Data</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number completed">②</div>
+                    <span class="workflow-step-label">Preprocess</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number active">③</div>
+                    <span class="workflow-step-label">Train Model</span>
+                </div>
+                <i class="fas fa-arrow-right workflow-arrow"></i>
+                <div class="workflow-step">
+                    <div class="workflow-step-number pending">④</div>
+                    <span class="workflow-step-label">Predict</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4 fw-bold"
+            style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i class="fas fa-brain" style="-webkit-text-fill-color: var(--secondary);"></i> Train Machine Learning
+            Models
+        </h2>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-robot"></i> Train Single Model
+                    </div>
+                    <div class="card-body">
+                        <select class="form-select mb-3" id="modelSelect">
+                            <option value="RandomForest">Random Forest</option>
+                            <option value="LogisticRegression">Logistic Regression</option>
+                            <option value="SVM">SVM</option>
+                            <option value="KNN">K-Nearest Neighbors</option>
+                            <option value="NaiveBayes">Naive Bayes</option>
+                            <option value="XGBoost">XGBoost</option>
+                            <option value="CatBoost">CatBoost</option>
+                        </select>
+                        <button class="btn btn-primary w-100" onclick="trainModel()" id="btnTrain">
+                            <i class="fas fa-play"></i> Train Model
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-balance-scale"></i> Compare All Models
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Train and compare all available models</p>
+                        <button class="btn btn-primary w-100" onclick="compareModels()" id="btnCompare">
+                            <i class="fas fa-chart-bar"></i> Compare All Models
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4" id="trainingResults"
+            style="display:none; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.08);">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i> Training Results
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <h3 id="metricAcc" style="color: var(--success);">-</h3>
+                            <p>Accuracy</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <h3 id="metricPrec" style="color: var(--primary);">-</h3>
+                            <p>Precision</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <h3 id="metricRec" style="color: var(--warning);">-</h3>
+                            <p>Recall</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <h3 id="metricF1" style="color: var(--danger);">-</h3>
+                            <p>F1-Score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center p-4" style="background: var(--light-gray); border-radius: 8px;">
+                    <h5 class="fw-bold mb-3">Confusion Matrix</h5>
+                    <img id="confusionMatrix" src="" alt="Confusion Matrix" class="img-fluid"
+                        style="max-width: 500px; border: 1px solid var(--light-gray); border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4" id="comparisonResults" style="display:none;">
+            <div class="card-header">
+                <i class="fas fa-table"></i> Model Comparison
+            </div>
+            <div class="card-body">
+                <div id="comparisonTable" class="table-responsive"></div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mb-4"
+            style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #3B82F6; border-left: 4px solid #2563EB;">
+            <h5 class="fw-bold mb-3" style="color: var(--primary);"><i class="fas fa-info-circle"></i> Model Persistence
+            </h5>
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h6 class="fw-bold" style="color: var(--primary);"><i class="fas fa-download"></i> Save Model</h6>
+                    <p class="mb-2" style="font-size: 0.9rem;">
+                        <strong>What it does:</strong> Saves your trained model to <code>stroke_model.pkl</code>
+                    </p>
+                    <p class="mb-0" style="font-size: 0.85rem; color: var(--gray);">
+                        <i class="fas fa-check-circle text-success"></i> Reuse model without retraining<br>
+                        <i class="fas fa-check-circle text-success"></i> Save time on future predictions<br>
+                        <i class="fas fa-check-circle text-success"></i> Preserve your best model
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold" style="color: var(--primary);"><i class="fas fa-upload"></i> Load Model</h6>
+                    <p class="mb-2" style="font-size: 0.9rem;">
+                        <strong>What it does:</strong> Loads a previously saved model from file
+                    </p>
+                    <p class="mb-0" style="font-size: 0.85rem; color: var(--gray);">
+                        <i class="fas fa-check-circle text-success"></i> Skip training entirely<br>
+                        <i class="fas fa-check-circle text-success"></i> Use saved model instantly<br>
+                        <i class="fas fa-check-circle text-success"></i> Continue from last session
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-save"></i> Save / Load Model
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                    <i class="fas fa-lightbulb text-warning"></i> <strong>Tip:</strong> Train a model first, then click
+                    "Save Model" to store it. Use "Load Model" to restore it later.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <button class="btn btn-success w-100" onclick="saveModel()">
+                            <i class="fas fa-download"></i> Save Model
+                        </button>
+                        <small class="text-muted d-block mt-2">Saves to: <code>stroke_model.pkl</code></small>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary w-100" onclick="loadModel()">
+                            <i class="fas fa-upload"></i> Load Model
+                        </button>
+                        <small class="text-muted d-block mt-2">Loads from: <code>stroke_model.pkl</code></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay"
+    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+    <div class="processing-content"
+        style="background: white; padding: 2rem; border-radius: 12px; text-align: center; max-width: 360px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+        <div class="loading-spinner"
+            style="width: 48px; height: 48px; border: 3px solid #E2E8F0; border-top: 3px solid #3B82F6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem;">
+        </div>
+        <h5 id="overlayTitle" style="font-weight: 600; color: #1E293B;">Training Model...</h5>
+        <p id="overlayMessage" class="text-muted mb-0">This may take a moment</p>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .processing-overlay {
+        position: fixed !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Check if preprocessing is done on page load
+    async function checkPrerequisites() {
+        try {
+            const response = await fetch('/check_data_status', { method: 'GET' });
+            const data = await response.json();
+
+            if (!data.data_loaded) {
+                showAlert('❌ Please upload dataset first!', 'danger');
+                setTimeout(() => { window.location.href = '/upload-page'; }, 2000);
+                return false;
+            }
+
+            if (!data.preprocessed) {
+                showAlert('❌ Please preprocess data first!', 'danger');
+                setTimeout(() => { window.location.href = '/preprocess-page'; }, 2000);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error checking prerequisites:', error);
+            return true;
+        }
+    }
+
+    // Run check on page load
+    checkPrerequisites();
+
+    async function trainModel() {
+        const btn = document.getElementById('btnTrain');
+        const model = document.getElementById('modelSelect').value;
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Training...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = `Training ${model}...`;
+        overlayMessage.textContent = 'This may take a moment';
+
+        try {
+            const response = await fetch('/train', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Training Complete!';
+                overlayMessage.textContent = model + ' trained successfully';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('metricAcc').textContent = (data.accuracy * 100).toFixed(1) + '%';
+                    document.getElementById('metricPrec').textContent = (data.precision * 100).toFixed(1) + '%';
+                    document.getElementById('metricRec').textContent = (data.recall * 100).toFixed(1) + '%';
+                    document.getElementById('metricF1').textContent = (data.f1 * 100).toFixed(1) + '%';
+                    document.getElementById('confusionMatrix').src = 'data:image/png;base64,' + data.confusion_matrix;
+                    document.getElementById('trainingResults').style.display = 'block';
+                    showAlert(model + ' trained successfully!', 'success');
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('Training failed: ' + error, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play"></i> Train Model';
+        }
+    }
+
+    async function compareModels() {
+        const btn = document.getElementById('btnCompare');
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Comparing...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Comparing All Models...';
+        overlayMessage.textContent = 'Training 7 algorithms - this may take a few minutes';
+
+        try {
+            const response = await fetch('/compare', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Comparison Complete!';
+                overlayMessage.textContent = 'All models evaluated successfully';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    let table = '<table class="table table-striped"><thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead><tbody>';
+
+                    data.results.sort((a, b) => b.accuracy - a.accuracy);
+
+                    data.results.forEach(r => {
+                        table += `<tr>
+                        <td><strong>${r.model}</strong></td>
+                        <td>${(r.accuracy * 100).toFixed(2)}%</td>
+                        <td>${(r.precision * 100).toFixed(2)}%</td>
+                        <td>${(r.recall * 100).toFixed(2)}%</td>
+                        <td>${(r.f1 * 100).toFixed(2)}%</td>
+                    </tr>`;
+                    });
+
+                    table += '</tbody></table>';
+                    document.getElementById('comparisonTable').innerHTML = table;
+                    document.getElementById('comparisonResults').style.display = 'block';
+                    showAlert('Model comparison complete!', 'success');
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('Comparison failed: ' + error, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-chart-bar"></i> Compare All Models';
+        }
+    }
+
+    async function saveModel() {
+        console.log('saveModel function called');
+        try {
+            showAlert('Saving model...', 'info');
+            const response = await fetch('/save_model', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            const data = await response.json();
+            console.log('Save response:', data);
+
+            if (response.ok && data.success) {
+                showAlert('✅ ' + data.message + ' (' + data.features + ' features)', 'success');
+            } else {
+                showAlert('❌ ' + (data.error || 'Save failed'), 'danger');
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            showAlert('❌ Save failed: ' + error.message, 'danger');
+        }
+    }
+
+    async function loadModel() {
+        console.log('loadModel function called');
+        try {
+            showAlert('Loading model...', 'info');
+            const response = await fetch('/load_model', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            const data = await response.json();
+            console.log('Load response:', data);
+
+            if (response.ok && data.success) {
+                showAlert('✅ ' + data.message + ' (' + data.features + ' features)', 'success');
+            } else {
+                showAlert('❌ ' + (data.error || 'Load failed'), 'danger');
+            }
+        } catch (error) {
+            console.error('Load error:', error);
+            showAlert('❌ Load failed: ' + error.message, 'danger');
+        }
+    }
+</script>
+
+<!-- Next Step Button -->
+<a href="/predict-page" class="next-step-btn" title="Next: Predict">
+    <i class="fas fa-arrow-right"></i>
+</a>
+{% endblock %}

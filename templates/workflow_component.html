@@ -1,0 +1,145 @@
+<!-- Workflow Progress Indicator Component -->
+<style>
+    .workflow-indicator {
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .workflow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .workflow-step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .workflow-step-number.active {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .workflow-step-number.completed {
+        background: #10B981;
+        color: white;
+    }
+
+    .workflow-step-number.pending {
+        background: #E2E8F0;
+        color: #64748B;
+    }
+
+    .workflow-step-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0F172A;
+    }
+
+    .workflow-arrow {
+        color: #CBD5E1;
+        font-size: 1.25rem;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .workflow-arrow {
+            display: block;
+        }
+
+        .workflow-step {
+            min-width: auto;
+        }
+    }
+
+    .next-step-btn {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .next-step-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
+    }
+
+    .next-step-btn:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    @media (max-width: 768px) {
+        .next-step-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+    }
+</style>
+
+<!-- Workflow Indicator HTML - Copy this to each page and change active step -->
+<div class="workflow-indicator">
+    <div class="workflow-steps">
+        <div class="workflow-step">
+            <div class="workflow-step-number active">①</div>
+            <span class="workflow-step-label">Upload Data</span>
+        </div>
+        <i class="fas fa-arrow-right workflow-arrow"></i>
+        <div class="workflow-step">
+            <div class="workflow-step-number pending">②</div>
+            <span class="workflow-step-label">Preprocess</span>
+        </div>
+        <i class="fas fa-arrow-right workflow-arrow"></i>
+        <div class="workflow-step">
+            <div class="workflow-step-number pending">③</div>
+            <span class="workflow-step-label">Train Model</span>
+        </div>
+        <i class="fas fa-arrow-right workflow-arrow"></i>
+        <div class="workflow-step">
+            <div class="workflow-step-number pending">④</div>
+            <span class="workflow-step-label">Predict</span>
+        </div>
+    </div>
+</div>
+
+<!-- Next Step Button - Copy to each page and change href -->
+<a href="/train-page" class="next-step-btn" title="Next Step: Train Model">
+    <i class="fas fa-arrow-right"></i>
+</a>

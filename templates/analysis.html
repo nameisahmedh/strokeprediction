@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Data Analysis - Arix Stroke Prediction{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="alert alert-light mb-4"
+            style="border-left: 4px solid #F59E0B; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-info-circle" style="color: #D97706; font-size: 1.25rem;"></i>
+                <div>
+                    <strong style="color: #92400E; font-weight: 600;">Requirements:</strong>
+                    <span style="color: #78350F;">Analysis requires uploaded dataset. Feature importance requires
+                        trained model.</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4 fw-bold"
+            style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i class="fas fa-chart-pie" style="-webkit-text-fill-color: var(--primary);"></i> Data Analysis & Insights
+        </h2>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-sync"></i> Load Analysis
+            </div>
+            <div class="card-body text-center">
+                <button class="btn btn-primary" onclick="loadAnalysis(event)" id="btnGenerateAnalysis">
+                    <i class="fas fa-chart-line"></i> Generate Analysis
+                </button>
+            </div>
+        </div>
+
+        <div id="analysisContent" style="display:none;">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-database"></i> Dataset Statistics
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <h3 id="totalRows" style="color: var(--primary);">-</h3>
+                                <p>Total Rows</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <h3 id="strokeCases" style="color: var(--danger);">-</h3>
+                                <p>Stroke Cases</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <h3 id="noStrokeCases" style="color: var(--success);">-</h3>
+                                <p>No Stroke Cases</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-balance-scale"></i> Class Distribution
+                </div>
+                <div class="card-body text-center" style="overflow-x: auto;">
+                    <img id="classDistImg" src="" alt="Class Distribution" class="img-fluid"
+                        style="max-width: 600px; width: 100%; height: auto;">
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user"></i> Age Distribution
+                </div>
+                <div class="card-body text-center" style="overflow-x: auto;">
+                    <img id="ageDistImg" src="" alt="Age Distribution" class="img-fluid"
+                        style="max-width: 800px; width: 100%; height: auto;">
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-project-diagram"></i> Feature Correlation Heatmap
+                </div>
+                <div class="card-body text-center" style="overflow-x: auto;">
+                    <img id="corrImg" src="" alt="Correlation Heatmap" class="img-fluid"
+                        style="max-width: 900px; width: 100%; height: auto;">
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i> Feature Importance
+                </div>
+                <div class="card-body text-center">
+                    <button class="btn btn-primary mb-3" onclick="loadFeatureImportance(event)"
+                        id="btnFeatureImportance">
+                        <i class="fas fa-magic"></i> Show Feature Importance
+                    </button>
+                    <div id="featureImportanceContent" style="overflow-x: auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay"
+    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+    <div class="processing-content"
+        style="background: white; padding: 2rem; border-radius: 12px; text-align: center; max-width: 360px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+        <div class="loading-spinner"
+            style="width: 48px; height: 48px; border: 3px solid #E2E8F0; border-top: 3px solid #3B82F6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem;">
+        </div>
+        <h5 id="overlayTitle" style="font-weight: 600; color: #1E293B;">Loading Analysis...</h5>
+        <p id="overlayMessage" class="text-muted mb-0">Generating visualizations</p>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Check if model is trained on page load
+    async function checkPrerequisites() {
+        try {
+            const response = await fetch('/check_data_status', { method: 'GET' });
+            const data = await response.json();
+
+            if (!data.data_loaded) {
+                showAlert('❌ Please upload dataset first!', 'danger');
+                setTimeout(() => { window.location.href = '/upload-page'; }, 2000);
+                return false;
+            }
+
+            if (!data.model_trained) {
+                showAlert('❌ Please train a model first to view analysis!', 'danger');
+                setTimeout(() => { window.location.href = '/train-page'; }, 2000);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error checking prerequisites:', error);
+            return true;
+        }
+    }
+
+    // Run check on page load
+    checkPrerequisites();
+
+    async function loadAnalysis(event) {
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+        const btn = event.target;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Generating Analysis...';
+        overlayMessage.textContent = 'Creating visualizations and statistics';
+
+        try {
+            const response = await fetch('/get_analysis', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Analysis Complete!';
+                overlayMessage.textContent = 'All visualizations generated';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('totalRows').textContent = data.stats.total_rows;
+                    document.getElementById('strokeCases').textContent = data.stats.stroke_cases;
+                    document.getElementById('noStrokeCases').textContent = data.stats.no_stroke_cases;
+
+                    if (data.class_dist_img) {
+                        document.getElementById('classDistImg').src = 'data:image/png;base64,' + data.class_dist_img;
+                    }
+                    if (data.age_dist_img) {
+                        document.getElementById('ageDistImg').src = 'data:image/png;base64,' + data.age_dist_img;
+                    }
+                    if (data.corr_img) {
+                        document.getElementById('corrImg').src = 'data:image/png;base64,' + data.corr_img;
+                    }
+
+                    document.getElementById('analysisContent').style.display = 'block';
+                    showAlert('Analysis loaded successfully!', 'success');
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('Failed to load analysis: ' + error, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-chart-line"></i> Generate Analysis';
+        }
+    }
+
+    async function loadFeatureImportance(event) {
+        const overlay = document.getElementById('processingOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+        const btn = event.target;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
+
+        overlay.style.display = 'flex';
+        overlayTitle.textContent = 'Loading Feature Importance...';
+        overlayMessage.textContent = 'Analyzing model features';
+
+        try {
+            const response = await fetch('/get_feature_importance', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                overlayTitle.textContent = '✅ Complete!';
+                overlayMessage.textContent = 'Feature importance loaded';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('featureImportanceContent').innerHTML =
+                        '<img src="data:image/png;base64,' + data.importance_img + '" alt="Feature Importance" class="img-fluid" style="max-width: 900px;">';
+                    showAlert('Feature importance loaded!', 'success');
+                }, 1000);
+            } else {
+                overlay.style.display = 'none';
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            overlay.style.display = 'none';
+            showAlert('Failed to load feature importance: ' + error, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic"></i> Show Feature Importance';
+        }
+    }
+</script>
+{% endblock %}

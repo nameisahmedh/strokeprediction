@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Learn More - Arix Stroke Prediction{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Hero Section -->
+        <div class="text-center mb-5 py-4">
+            <h1 class="display-4 fw-bold mb-3">How It Works</h1>
+            <p class="lead text-muted">Understanding our Machine Learning-Based Stroke Prediction System</p>
+        </div>
+
+        <!-- What is This System -->
+        <div class="card mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-bold mb-4">What is This System?</h2>
+                <p class="lead mb-4">
+                    This is a <strong>Machine Learning-based healthcare tool</strong> that analyzes patient data to
+                    predict stroke risk.
+                    It uses proven statistical algorithms trained on real healthcare datasets.
+                </p>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-4"
+                            style="background: #F0FDF4; border-left: 3px solid #10B981; border-radius: 8px;">
+                            <h5 class="fw-bold mb-2" style="color: #10B981;">
+                                <i class="fas fa-check-circle"></i> What It Is
+                            </h5>
+                            <ul class="mb-0">
+                                <li>Machine Learning classification system</li>
+                                <li>Uses 7 proven ML algorithms</li>
+                                <li>Trained on real stroke patient data</li>
+                                <li>Analyzes 11 health parameters</li>
+                                <li>Provides risk predictions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4"
+                            style="background: #FEF3C7; border-left: 3px solid #F59E0B; border-radius: 8px;">
+                            <h5 class="fw-bold mb-2" style="color: #F59E0B;">
+                                <i class="fas fa-exclamation-triangle"></i> What It's Not
+                            </h5>
+                            <ul class="mb-0">
+                                <li>Not a medical diagnosis tool</li>
+                                <li>Not a replacement for doctors</li>
+                                <li>Not generative AI (like ChatGPT)</li>
+                                <li>Not a treatment recommendation system</li>
+                                <li>Not FDA-approved medical device</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works - Step by Step -->
+        <div class="card mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-bold mb-4">The 4-Step Process</h2>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-center">
+                            <div class="mb-3"
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">
+                                <span class="text-white fw-bold" style="font-size: 1.5rem;">1</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">Upload Data</h5>
+                            <p class="text-muted small mb-0">Provide patient healthcare data in CSV format with 11
+                                required parameters</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-center">
+                            <div class="mb-3"
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">
+                                <span class="text-white fw-bold" style="font-size: 1.5rem;">2</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">Preprocess</h5>
+                            <p class="text-muted small mb-0">Data is encoded, scaled, balanced with SMOTE, and features
+                                are selected</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-center">
+                            <div class="mb-3"
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">
+                                <span class="text-white fw-bold" style="font-size: 1.5rem;">3</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">Train Model</h5>
+                            <p class="text-muted small mb-0">Choose and train one of 7 ML algorithms on your processed
+                                dataset</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-center">
+                            <div class="mb-3"
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">
+                                <span class="text-white fw-bold" style="font-size: 1.5rem;">4</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">Predict</h5>
+                            <p class="text-muted small mb-0">Get stroke risk predictions for individual patients or
+                                batch analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Machine Learning Algorithms -->
+        <div class="card mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-bold mb-4">7 Machine Learning Algorithms</h2>
+                <p class="text-muted mb-4">The system supports multiple proven ML algorithms. You can train and compare
+                    all of them:</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-tree" style="color: #10B981;"></i> Random Forest
+                            </h6>
+                            <p class="small text-muted mb-0">Ensemble method using multiple decision trees for robust
+                                predictions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-project-diagram" style="color: #4F46E5;"></i> XGBoost
+                            </h6>
+                            <p class="small text-muted mb-0">Gradient boosting algorithm known for high accuracy in
+                                classification</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chart-line" style="color: #F59E0B;"></i> Logistic Regression
+                            </h6>
+                            <p class="small text-muted mb-0">Statistical model for binary classification with
+                                probability outputs</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-vector-square" style="color: #EF4444;"></i> SVM (Support Vector
+                                Machine)
+                            </h6>
+                            <p class="small text-muted mb-0">Finds optimal decision boundary for classification tasks
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-users" style="color: #8B5CF6;"></i> K-Nearest Neighbors
+                            </h6>
+                            <p class="small text-muted mb-0">Classifies based on similarity to nearest training examples
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-sitemap" style="color: #06B6D4;"></i> Decision Tree
+                            </h6>
+                            <p class="small text-muted mb-0">Tree-based model making decisions through feature splits
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: #F8FAFC; border-radius: 8px;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-cat" style="color: #F97316;"></i> CatBoost
+                            </h6>
+                            <p class="small text-muted mb-0">Advanced gradient boosting optimized for categorical
+                                features</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Preprocessing -->
+        <div class="card mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-bold mb-4">Data Preprocessing Pipeline</h2>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <div class="mb-2" style="font-size: 2rem; color: #4F46E5;">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">Encoding</h6>
+                            <p class="small text-muted mb-0">Converts categorical data (gender, work_type) to numerical
+                                format</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <div class="mb-2" style="font-size: 2rem; color: #10B981;">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">Scaling</h6>
+                            <p class="small text-muted mb-0">Normalizes numerical features to the same scale</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <div class="mb-2" style="font-size: 2rem; color: #F59E0B;">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">SMOTE</h6>
+                            <p class="small text-muted mb-0">Balances dataset by creating synthetic minority samples</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <div class="mb-2" style="font-size: 2rem; color: #EF4444;">
+                                <i class="fas fa-filter"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">Feature Selection</h6>
+                            <p class="small text-muted mb-0">Selects most important features using SelectKBest</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11 Health Parameters -->
+        <div class="card mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-bold mb-4">11 Required Health Parameters</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Example Values</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>gender</strong></td>
+                                <td><span class="badge bg-primary">Categorical</span></td>
+                                <td>Patient's gender</td>
+                                <td>Male, Female, Other</td>
+                            </tr>
+                            <tr>
+                                <td><strong>age</strong></td>
+                                <td><span class="badge bg-success">Numerical</span></td>
+                                <td>Age in years</td>
+                                <td>0-120</td>
+                            </tr>
+                            <tr>
+                                <td><strong>hypertension</strong></td>
+                                <td><span class="badge bg-warning">Binary</span></td>
+                                <td>High blood pressure history</td>
+                                <td>0 (No), 1 (Yes)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>heart_disease</strong></td>
+                                <td><span class="badge bg-warning">Binary</span></td>
+                                <td>Heart disease history</td>
+                                <td>0 (No), 1 (Yes)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ever_married</strong></td>
+                                <td><span class="badge bg-primary">Categorical</span></td>
+                                <td>Marital status</td>
+                                <td>Yes, No</td>
+                            </tr>
+                            <tr>
+                                <td><strong>work_type</strong></td>
+                                <td><span class="badge bg-primary">Categorical</span></td>
+                                <td>Type of occupation</td>
+                                <td>Private, Self-employed, Govt_job, children, Never_worked</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Residence_type</strong></td>
+                                <td><span class="badge bg-primary">Categorical</span></td>
+                                <td>Living area type</td>
+                                <td>Urban, Rural</td>
+                            </tr>
+                            <tr>
+                                <td><strong>avg_glucose_level</strong></td>
+                                <td><span class="badge bg-success">Numerical</span></td>
+                                <td>Average blood glucose (mg/dL)</td>
+                                <td>50-300</td>
+                            </tr>
+                            <tr>
+                                <td><strong>bmi</strong></td>
+                                <td><span class="badge bg-success">Numerical</span></td>
+                                <td>Body Mass Index</td>
+                                <td>10-60</td>
+                            </tr>
+                            <tr>
+                                <td><strong>smoking_status</strong></td>
+                                <td><span class="badge bg-primary">Categorical</span></td>
+                                <td>Smoking history</td>
+                                <td>formerly smoked, never smoked, smokes, Unknown</td>
+                            </tr>
+                            <tr>
+                                <td><strong>stroke</strong></td>
+                                <td><span class="badge bg-danger">Target</span></td>
+                                <td>Stroke occurrence (training only)</td>
+                                <td>0 (No), 1 (Yes)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Get Started CTA -->
+        <div class="card mb-5" style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); border: none;">
+            <div class="card-body p-5 text-center text-white">
+                <h3 class="fw-bold mb-3">Ready to Get Started?</h3>
+                <p class="mb-4">Upload your dataset or use our default healthcare data to try the system</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="/upload-page" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-upload me-2"></i>Upload Data
+                    </a>
+                    <a href="/" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
