@@ -307,7 +307,7 @@ def upload_dataset():
         
         if missing_cols:
             return jsonify({
-                'error': f'Invalid CSV file. Missing required columns: {', '.join(missing_cols)}',
+                'error': f'Invalid CSV file. Missing required columns: {", ".join(missing_cols)}',
                 'required': required_cols,
                 'found': list(df.columns)
             }), 400
@@ -479,7 +479,7 @@ def predict_csv():
         
         if missing_cols:
             return jsonify({
-                'error': f'Invalid CSV file. Missing required columns: {', '.join(missing_cols)}',
+                'error': f'Invalid CSV file. Missing required columns: {", ".join(missing_cols)}',
                 'required': required_cols,
                 'found': list(df.columns),
                 'hint': 'Please ensure your CSV has all the required feature columns from the trained model.'
