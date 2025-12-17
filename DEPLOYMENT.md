@@ -1,99 +1,124 @@
-# Quick Deployment Guide - Railway (Recommended)
+# Deploy to Render (Docker)
 
-Railway is the easiest and most reliable platform for this app. It handles Python versions correctly and has excellent free tier.
+This guide will help you deploy the Stroke Prediction app to Render using Docker.
 
-## Deploy to Railway (5 Minutes)
+## Prerequisites
 
-### Step 1: Sign Up
-1. Go to https://railway.app
-2. Click "Login" and sign in with GitHub
-3. Authorize Railway to access your repositories
+- GitHub account with the repository pushed
+- Render account (free tier available)
 
-### Step 2: Create New Project
-1. Click "New Project"
-2. Select "Deploy from GitHub repo"
-3. Choose `nameisahmedh/strokeprediction`
-4. Railway will automatically detect it's a Python app
+## Deployment Steps
 
-### Step 3: Configure (Automatic)
-Railway automatically:
-- Detects Python from `runtime.txt` 
-- Installs dependencies from `requirements.txt`
-- Uses `Procfile` for start command
-- Sets up environment variables
+### Step 1: Sign Up for Render
+
+1. Go to https://render.com
+2. Click **"Get Started"** or **"Sign In"**
+3. Sign in with your GitHub account
+4. Authorize Render to access your repositories
+
+### Step 2: Create New Web Service
+
+1. Click **"New +"** button (top right)
+2. Select **"Web Service"**
+3. Connect your repository: `nameisahmedh/strokeprediction`
+4. Click **"Connect"**
+
+### Step 3: Configure Service
+
+**Name:** `strokeprediction` (or your preferred name)
+
+**Region:** **Singapore** (closest to India)
+
+**Branch:** `main`
+
+**Root Directory:** Leave blank
+
+**Environment:** **Docker** ⚠️ **CRITICAL - Must select Docker, NOT Python!**
+
+**Instance Type:** **Free**
 
 ### Step 4: Deploy
-1. Click "Deploy"
-2. Wait 3-5 minutes for build
-3. Railway will give you a URL like: `https://strokeprediction-production.up.railway.app`
 
-### Step 5: Generate Domain (Optional)
-1. Go to Settings → Networking
-2. Click "Generate Domain"
-3. Your app will be live!
-
-## Why Railway?
-✅ No Python 3.13 issues - properly respects runtime.txt
-✅ Faster builds - uses pre-compiled wheels
-✅ Free tier: 500 hours/month, $5 credit
-✅ Auto-deploys on git push
-✅ Better error messages
-✅ No credit card required for free tier
-
-## Troubleshooting
-
-If build fails, check:
-- Logs in Railway dashboard
-- Make sure all files are pushed to GitHub
-- Verify runtime.txt has `python-3.11.9`
+1. Click **"Create Web Service"**
+2. Wait 5-7 minutes for first build
+3. Your app will be live at: `https://strokeprediction.onrender.com`
 
 ## After Deployment
 
-Visit your app URL and:
-1. Upload dataset from `Dataset/healthcare-dataset-stroke-data.csv`
-2. Preprocess data
-3. Train model (2-3 minutes first time)
-4. Make predictions!
+### First-Time Setup
 
----
+1. Visit your deployed URL
+2. Upload the dataset: `healthcare-dataset-stroke-data.csv`
+3. Click "Preprocess Data"
+4. Click "Train Model" (takes 2-3 minutes)
+5. Navigate to "Predictions" to test
 
-# Alternative: Fix Render Deployment
+### Important Notes
 
-If you must use Render, try these steps:
+⚠️ **Free Tier Limitations:**
+- Instance sleeps after 15 minutes of inactivity
+- First request after sleep takes 30-60 seconds
+- 750 hours/month (sufficient for personal projects)
 
-## Clear Render Cache
-1. Go to your Render dashboard
-2. Navigate to your web service
-3. Click "Manual Deploy"   → "Clear build cache & deploy"
-4. This forces Render to rebuild from scratch
+⚠️ **Model Training:**
+- Model is not saved in the repository
+- Train model after each deployment
+- Takes 2-3 minutes on first training
 
-## Or Create New Service
-1. **Delete** the old Render service
-2. Create a **brand new** web service
-3. Fresh builds don't have caching issues
+## Troubleshooting
 
----
+### Build Fails
 
-# Alternative: Heroku Deployment
+**Solution:** Ensure you selected **Docker** as environment, not Python
 
-```powershell
-# Install Heroku CLI
-winget install Heroku.HerokuCLI
+### Long First Load
 
-# Login
-heroku login
+**Solution:** Free tier instances sleep. Wait 30-60 seconds for wake-up
 
-# Create app
-cd c:\Users\Ahmed\OneDrive\Documents\PROJECTS_AHMED\StrokePrediction
-heroku create strokeprediction
+### "This site can't be reached"
 
-# Deploy
-git push heroku main
+**Solution:** Build may still be in progress. Check Render dashboard for status
 
-# Open app
-heroku open
+## Auto-Deploy
+
+Render automatically redeploys when you push to GitHub:
+
+```bash
+git add .
+git commit -m "Update app"
+git push origin main
+# Render auto-deploys in 3-5 minutes
 ```
 
+## Manual Redeploy
+
+1. Go to Render dashboard
+2. Click your service
+3. Click **"Manual Deploy"** → **"Deploy latest commit"**
+
+## Free Tier Details
+
+- **750 hours/month** - enough for 24/7 with one app
+- **512 MB RAM** - sufficient for this application
+- **Automatic HTTPS** - included
+- **Custom domain** - supported (optional)
+- **Auto-deploy** - on git push
+
+## Repository Files Used
+
+- `Dockerfile` - Defines Python 3.11.9 environment
+- `requirements.txt` - Python dependencies
+- `Procfile` - Start command (used by Docker)
+- `.gitignore` - Excludes unnecessary files
+
+## Support
+
+For deployment issues, check:
+- Render docs: https://render.com/docs
+- Render community: https://community.render.com
+
 ---
 
-**RECOMMENDATION**: Use Railway - it's specifically designed to avoid the issues you're experiencing with Render.
+**Your app is now live!** 🚀
+
+Visit your URL and start predicting stroke risk!
