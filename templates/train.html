@@ -457,58 +457,48 @@
     }
 
     async function saveModel() {
-        console.log('saveModel function called');
         try {
-            showAlert('Saving model...', 'info');
+            showLoading('Saving model...');
+
             const response = await fetch('/save_model', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
             const data = await response.json();
-            console.log('Save response:', data);
+            hideLoading();
 
             if (response.ok && data.success) {
-                showAlert('✅ ' + data.message + ' (' + data.features + ' features)', 'success');
+                showToast(`✅ Model saved successfully! (${data.features} features)`, 'success');
             } else {
-                showAlert('❌ ' + (data.error || 'Save failed'), 'danger');
+                showToast(data.error || 'Save failed', 'error');
             }
         } catch (error) {
-            console.error('Save error:', error);
-            showAlert('❌ Save failed: ' + error.message, 'danger');
+            hideLoading();
+            showToast('Save failed: ' + error.message, 'error');
         }
     }
 
     async function loadModel() {
-        console.log('loadModel function called');
         try {
-            showAlert('Loading model...', 'info');
+            showLoading('Loading model...');
+
             const response = await fetch('/load_model', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
             const data = await response.json();
-            console.log('Load response:', data);
+            hideLoading();
 
             if (response.ok && data.success) {
-                showAlert('✅ ' + data.message + ' (' + data.features + ' features)', 'success');
+                showToast(`✅ Model loaded successfully! (${data.features} features)`, 'success');
             } else {
-                showAlert('❌ ' + (data.error || 'Load failed'), 'danger');
+                showToast(data.error || 'Load failed', 'error');
             }
         } catch (error) {
-            console.error('Load error:', error);
-            showAlert('❌ Load failed: ' + error.message, 'danger');
+            hideLoading();
+            showToast('Load failed: ' + error.message, 'error');
         }
     }
 </script>
