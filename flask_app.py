@@ -298,6 +298,20 @@ def upload_dataset():
     
     try:
         df = pd.read_csv(file)
+        
+        # Validate required columns
+        required_cols = ['id', 'gender', 'age', 'hypertension', 'heart_disease', 'ever_married', 
+                        'work_type', 'Residence_type', 'avg_glucose_level', 'bmi', 'smoking_status']
+        
+        missing_cols = [col for col in required_cols if col not in df.columns]
+        
+        if missing_cols:
+            return jsonify({
+                'error': f'Invalid CSV file. Missing required columns: {', '.join(missing_cols)}',
+                'required': required_cols,
+                'found': list(df.columns)
+            }), 400
+        
         session_data['raw_df'] = df
         
         stats = {
@@ -459,11 +473,17 @@ def predict_csv():
         file = request.files['file']
         df = pd.read_csv(file)
         
-        # Add missing columns with default values
+        # Validate required columns
         required_cols = session_data['meta']['feature_names']
-        for col in required_cols:
-            if col not in df.columns:
-                df[col] = 0
+        missing_cols = [col for col in required_cols if col not in df.columns]
+        
+        if missing_cols:
+            return jsonify({
+                'error': f'Invalid CSV file. Missing required columns: {', '.join(missing_cols)}',
+                'required': required_cols,
+                'found': list(df.columns),
+                'hint': 'Please ensure your CSV has all the required feature columns from the trained model.'
+            }), 400
         
         preds = ml.predict_dataframe(session_data['model'], session_data['meta'], df)
         
