@@ -36,6 +36,7 @@ stroke_model.pkl
 *.pkl
 *.h5
 *.joblib
+catboost_info/
 
 # Uploaded Files
 uploads/*
