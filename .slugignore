@@ -1,0 +1,11 @@
+# Ignore build artifacts
+*.pyc
+__pycache__/
+.DS_Store
+
+# Don't include uploaded datasets in the slug
+uploads/
+
+# Don't include virtual environments
+venv/
+env/

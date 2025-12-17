@@ -41,7 +41,7 @@ if errorlevel 1 (
 
 echo.
 echo Step 4: Committing changes...
-git commit -m "Complete rewrite: Arix Stroke Prediction System - Added sequential workflow enforcement - Implemented 7 ML algorithms (RandomForest, XGBoost, CatBoost, SVM, KNN, LogisticRegression, NaiveBayes) - Enhanced UI with modern responsive design - Added comprehensive data preprocessing (SMOTE, scaling, feature selection) - Fixed upload validation and workflow issues - Implemented feature importance visualization - Ready for production deployment"
+git commit -m "Production-ready: Stroke Prediction ML System with 7 algorithms, sequential workflow, and modern UI"
 if errorlevel 1 (
     echo WARNING: Commit failed or nothing to commit
 )
