@@ -157,7 +157,7 @@ strokeprediction/
 ## 🤖 ML Models
 
 | Model | Type | Best For | Accuracy* |
-|-------|------|----------|-----------|
+|-------|------|----------|-----------| 
 | **Random Forest** ⭐ | Ensemble | Default choice, balanced performance | ~94% |
 | **XGBoost** | Gradient Boosting | High accuracy, feature importance | ~95% |
 | **CatBoost** | Gradient Boosting | Categorical features | ~94% |
